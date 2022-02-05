@@ -64,7 +64,7 @@ func FetchUsers(tableName string, dbClient dynamodbiface.DynamoDBAPI)(*[]User,er
 		return nil, errors.New(ErrorFailedToFetchRecord)
 	}
 	item := new([]User)
-	err = dynamodbattribute.UnmarshalMap(result.Items, item)
+	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, item)
 	return item, nil
 }
 
@@ -131,6 +131,21 @@ func UpdateUser(req events.APIGatewayProxyRequest, tableName string, dbClient dy
 
 }
 
-func DeleteUser() error{
+func DeleteUser(req events.APIGatewayProxyRequest, tableName string, dbClient dynamodbiface.DynamoDBAPI) error{
 
+	email := req.QueryStringParameters["email"]
+	input := &dynamodb.DeleteItemInput{
+		Key: map[string]*dynamodb.AttributeValue{
+			"email" : {
+				S: aws.String(email),
+			},
+		},
+		TableName: aws.String(tableName),
+	}
+	_, err := dbClient.DeleteItem(input)
+	if err != nil {
+		return errors.New(ErrorCouldNotDeleteItem)
+	}
+
+	return nil   
 }
