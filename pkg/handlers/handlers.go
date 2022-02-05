@@ -54,3 +54,18 @@ func UpdateUser(req events.APIGatewayProxyRequest, tableName string, dbClient dy
 	}
 	return apiResponse(http.StatusOK, result)
 }
+
+func DeleteUser(req events.APIGatewayProxyRequest, tableName string, dbClient dynamodbiface.DynamoDBAPI)(*events.APIGatewayProxyResponse, error){
+
+	err := user.DeleteUser(req, tableName, dbClient)
+	if err != nil {
+		return apiResponse(http.StatusBadRequest,ErrorBody{
+			aws.String(err.Error()),
+		})
+	}
+	return apiResponse(http.StatusOK, nil)
+}
+
+func UnhandleMethod()(*events.APIGatewayProxyResponse, error){
+	return apiResponse(http.StatusMethodNotAllowed, ErrMethodNotAllowed)
+}
